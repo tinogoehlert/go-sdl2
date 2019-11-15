@@ -25,9 +25,12 @@ package mix
 //	return (frames * 1000) / freq;
 //}
 import "C"
-import "unsafe"
-import "reflect"
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"reflect"
+	"unsafe"
+
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 // Chunk is the internal format for an audio chunk.
 // (https://www.libsdl.org/projects/SDL_mixer/docs/SDL_mixer_85.html)
@@ -131,6 +134,26 @@ func OpenAudio(frequency int, format uint16, channels, chunksize int) error {
 		return sdl.GetError()
 	}
 	return nil
+}
+
+// OpenAudioDevice opens a specific audio device.
+// (https://wiki.libsdl.org/SDL_OpenAudioDevice)
+func OpenAudioDevice(frequency int, format uint16, channels, chunksize int, device string, allowedChanges int) (sdl.AudioDeviceID, error) {
+	_device := C.CString(device)
+	if device == "" {
+		_device = nil
+	}
+	_frequency := (C.int)(frequency)
+	_format := (C.Uint16)(format)
+	_channels := (C.int)(channels)
+	_chunksize := (C.int)(chunksize)
+	_allowedChanges := (C.int)(allowedChanges)
+	defer C.free(unsafe.Pointer(_device))
+	// int frequency, Uint16 format, int channels, int chunksize, const char* device, int allowed_changes
+	if id := sdl.AudioDeviceID(C.Mix_OpenAudioDevice(_frequency, _format, _channels, _chunksize, _device, _allowedChanges)); id > 0 {
+		return id, nil
+	}
+	return 0, sdl.GetError()
 }
 
 // AllocateChannels dynamically changes the number of channels managed by the mixer. If decreasing the number of channels, the upper channels are stopped. This function returns the new number of allocated channels. Returns: The number of channels allocated.
