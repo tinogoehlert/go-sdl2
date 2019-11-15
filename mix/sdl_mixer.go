@@ -29,7 +29,7 @@ import (
 	"reflect"
 	"unsafe"
 
-	"github.com/veandco/go-sdl2/sdl"
+	"github.com/tinogoehlert/go-sdl2/sdl"
 )
 
 // Chunk is the internal format for an audio chunk.
